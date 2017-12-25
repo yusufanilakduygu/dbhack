@@ -951,3 +951,79 @@ def parse_mssql_check_odbc(pcmd):
           return_list.append(portrange_list)
           
     return return_list
+
+def parse_network_ping(pcmd):
+
+    ipField = Word(nums, max=3)
+
+    name = Optional(Word(nums))+ Optional(Word(alphas)) + Optional("-") + Optional(".") 
+
+    full_ip     =  Combine(ipField + "." + ipField + "." + ipField + "." + ipField )
+    
+    servername=servername=Combine(Word(alphas)+ Optional(Word(alphas+nums+"."+"-"+"#")))
+
+    servernames= Or([full_ip , servername])
+    
+
+    iprange     =  ipField + "." + ipField + "." + ipField + "." + ipField + "-" + ipField
+    
+    
+    server_parser="-s"+Group(Or([  iprange , delimitedList(servernames)])).setResultsName('server')
+
+   
+
+    Oracle_tnsping_parser= (server_parser )+";"
+    
+    return_list=list()
+    
+    try:
+        parse_result= Oracle_tnsping_parser.parseString(pcmd)
+    except ParseException:
+        error_module('parse_network_ping_010','ParseException from dbhack_parser.parse_mssql_ping','Your command can not be parsed')
+        return_list=['Error']
+        return return_list
+        
+
+   
+    
+    server_list =list(parse_result['server'])
+
+    server_range_list=list()
+    
+    # Server is ip range
+    if '-' in server_list :
+        
+        # Check ip range list
+        
+        if int(server_list[6])  >=  int(server_list[8]):
+            error_module('parse_network_ping_030','IP range condition check at dbhack_parser.parse_mssql_ping','IP Range is not correct')
+            return_list=['Error']
+            return return_list
+        
+        #Check IP less than 255
+
+        
+        if int(server_list[6]) > 255 or int(server_list[8]) > 255 or int(server_list[0]) > 255 or int(server_list[2]) > 255 or int(server_list[4]) > 255:
+            error_module('parse_network_ping_040','IP range condition check at dbhack_parser.parse_mssql_ping','IPs greater than 255')
+            return_list=['Error']
+            return return_list 
+        
+        # Prepare IPs
+        
+        domain_ip = server_list[0]+'.'+server_list[2]+'.'+server_list[4]+'.'
+        
+        for x in range(int(server_list[6]),int(server_list[8])+1):
+            server_range_list.append(domain_ip+str(x))
+            
+        return_list.append(server_range_list)
+                
+    else:
+       # if there is no ip range put server_list into return list directly
+        return_list.append(server_list)
+        
+
+    return return_list
+
+
+
+

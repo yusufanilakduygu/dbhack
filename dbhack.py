@@ -9,6 +9,7 @@ from cmd2 import Cmd
 from dbhack_mssqlModules import *
 import pyparsing
 from dbhack_error_module import *
+from dbhack_pingModules import *
 
 class REPL(Cmd):
 
@@ -270,10 +271,37 @@ class REPL(Cmd):
 
         """
         ora_brute_with_file(args)
-        
+
+    def do_ping (self,args):
+       
+        """ 
+
+        Command Name : ping
+​
+        Explanation
+        ----------
+        ping command pings a server.
+	This command is used to check the existense of a server.
+	This is a ping command from operating system. If you want;
+	you can use ! ping command with argument instead of this
+
+        Syntax
+        ----------
+        ping -s  <server1,server2> 
+        ping -s  < xxx.xxx.xxxx.xx-xxx>  
+
+        Samples
+        ---------
+        ping -s 192.168.1.37  
+        ping -s 192.168.1.37-40
+	ping -s 192.168.1.37, 192.168.1.42
+   
+        """
+        network_ping(args)
+       
     def do_version(self,args):
         print('')
-        print(" dbhack ver 1.0 Developed bu Y. Anıl Akduygu at Sile/Istanbul ")
+        print(" dbhack ver 1.1 Developed bu Y. Anıl Akduygu at Sile/Istanbul ")
         print(" ")
 
     def do_exit(self,args):
@@ -281,9 +309,10 @@ class REPL(Cmd):
 
 if __name__ == '__main__':
     print(' ')
-    print("DBHack program ver 1.0 Developed by Y. Anıl Akduygu in Sile - Istanbul")
+    print("DBHack program ver 1.1 Developed by Y. Anıl Akduygu in Sile - Istanbul")
     print(" ")
     commands(" ")
     print(" ")
+    print("DBHack program ver 1.1 Developed by Y. Anıl Akduygu in Sile - Istanbul")
     app = REPL()
     app.cmdloop()

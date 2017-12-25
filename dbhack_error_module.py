@@ -24,3 +24,10 @@ def commands(args):
         print(' --> mssql_brute_file ')
         print(' --> mssql_brute_null_passwd')
         print(" ")
+        print(' Network Commands ')
+        print(" ")
+        print(' --> ping   ')
+        print(' --> ping_port  ')
+        print(' --> ping_dbports  ')
+
+        print(" ")

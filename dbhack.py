@@ -298,7 +298,70 @@ class REPL(Cmd):
    
         """
         network_ping(args)
+
+    def do_ping_port (self,args):
        
+        """ 
+
+        Command Name : ping_port
+​
+        Explanation
+        ----------
+        ping_port tries to open  a TCP socket connection with given ports
+        You can open connection with a server or servers or a network range
+        Port can be a single port or ports or a port range
+
+        Syntax
+        ----------
+        ping_port -s  <servename1,servername2,...>  -p  <port01,port02 ...>
+        ping_port -s  < xxx.xxx.xxxx.xx-xxx> -p < port01-port02>
+        Samples
+        ---------
+        ping_port -s 192.168.0.27 -p 1521
+        ping_port -s 192.168.0.27 -p 1521-1522
+        ping_port -s 192.168.0.27-28  -p 1521,1522
+        ping_port -s 192.168.0.27, 192.168.15.28  -p 1521,1522
+        ping_port -s 192.168.0.27-30  -p 1521,1522
+        ping_port -s servername01  -p 1521,1522
+        ping_port -s servername01,servername01  -p 1521,1522
+   
+        """
+        network_ping_ports(args)
+
+    def do_ping_dbports (self,args):
+       
+        """ 
+
+        Command Name : ping_dbports
+​
+        Explanation
+        ----------
+        ping_dbports tries to open a TCP socket connection
+        with default database ports, Which are given below.
+
+        Ports      	Default Ports
+        ------------    --------------------------
+        1521 - 1526 	Oracle Net Listener
+        1433  		SQL Server Database Engine
+        1434  		SQL Server Browser Service
+        3306  		MySQL
+        5432  		PostgreSQL
+        27017 - 27019 	MongoDBs
+
+        Syntax
+        ----------
+        ping_dbports -s  <server1,server2> 
+        ping_dbports  -s  < xxx.xxx.xxxx.xx-xxx>  
+
+        Samples
+        ---------
+        ping_dbports -s 192.168.1.37  
+        ping_dbports -s 192.168.1.37-40
+	ping_dbports -s 192.168.1.37, 192.168.1.42
+   
+        """
+        network_ping_dbports(args)
+        
     def do_version(self,args):
         print('')
         print(" dbhack ver 1.1 Developed bu Y. Anıl Akduygu at Sile/Istanbul ")

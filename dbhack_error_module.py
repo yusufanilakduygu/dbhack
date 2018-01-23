@@ -15,6 +15,7 @@ def commands(args):
         print(' --> ora_sid  ')
         print(' --> ora_brute ')
         print(' --> ora_brute_file  ')
+        print(' --> ora_tns_poison ')
         print(" ")
         print(' MSSQL Commands ')
         print(" ")

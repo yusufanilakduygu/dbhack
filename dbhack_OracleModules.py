@@ -1,3 +1,5 @@
+# tns_poison eklendi 23 Ocak 2018
+
 from dbhack_parser import *
 import socket
 import itertools
@@ -170,7 +172,7 @@ def oracle_sid_test(p_servername,p_port,p_sid):
 	0x4f, 0x98, 			# Nt Protocol Characteristics 
 	0x00, 0x00, 			# Line turnaround Value 
 	0x00, 0x01,                     # Value of 1 in Hardware
-    0x00			        # Length of Connect Data , First Byte
+        0x00			        # Length of Connect Data , First Byte
 	])
 
     tns_msg2=bytearray([
@@ -247,7 +249,7 @@ def oracle_sid_test(p_servername,p_port,p_sid):
 	0x4f, 0x98, 			# Nt Protocol Characteristics 
 	0x00, 0x00, 			# Line turnaround Value 
 	0x00, 0x01,                     # Value of 1 in Hardware
-    0x00			        # Length of Connect Data , First Byte
+        0x00			        # Length of Connect Data , First Byte
 	])
 
     tns_msg2=bytearray([
@@ -307,4 +309,59 @@ def ora_connect_test( p_server,p_port,p_sid,p_user,p_passwd):
         return
     print(' Connection is Successfull DB version ',connection.version)
     connection.close
+    return
+
+
+def tns_poison(p_servername,p_port):
+    sock= socket.socket()
+    sock.settimeout(5)
+    try:
+        print('')
+        print (' Connection : '+p_servername+' : '+str(p_port)+'...')
+        sock.connect((p_servername, p_port))
+    except Exception as error:
+        print("")
+        print('  Not Connected to Server ' + str(error))
+        print("")
+        sock.close()
+        return
+    print('  Connected to the port')
+    
+    # Message sent: (CONNECT_DATA=(COMMAND =service_register_NSGR))
+    # to check tns posion vulnerability
+    
+    send_msg= bytearray ([
+    0x00, 0x50, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 
+    0x01, 0x34, 0x01, 0x2c, 0x00, 0x00, 0x08, 0x00, 
+    0x7f, 0xff, 0x4f, 0x98, 0x00, 0x00, 0x00, 0x01, 
+    0x00, 0x2e, 0x00, 0x22, 0x00, 0x00, 0x00, 0x00, 
+    0x01, 0x01, 0x28, 0x43, 0x4f, 0x4e, 0x4e, 0x45, 
+    0x43, 0x54, 0x5f, 0x44, 0x41, 0x54, 0x41, 0x3d, 
+    0x28, 0x43, 0x4f, 0x4d, 0x4d, 0x41, 0x4e, 0x44, 
+    0x3d, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 
+    0x5f, 0x72, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 
+    0x72, 0x5f, 0x4e, 0x53, 0x47, 0x52, 0x29, 0x29] )
+
+    sock.send(send_msg)
+    msg = sock.recv(2048)
+
+    ascii_message=str(msg)
+    vssnum_loc=ascii_message.find('ERROR')
+    
+    if vssnum_loc == -1:
+        print ('  >>> Tns Poision vulnerability <<< FOUND')   
+        print()
+    else:
+        print ("  There is no tns poison vulnerability")
+        print()
+    sock.close()
+    return
+
+def ora_tns_poison(args):
+    parsed_command=parse_server_port(args+" ;")
+    if parsed_command[0] == 'Error':
+            return
+    else:
+            for i in itertools.product( parsed_command[0], parsed_command[1]):
+                tns_poison(i[0],i[1])
     return

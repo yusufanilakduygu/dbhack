@@ -1,3 +1,5 @@
+# tns poison addition
+
 """
 This is the starting code for DBHack
 
@@ -57,6 +59,35 @@ class REPL(Cmd):
 
         """
         ora_chk(args)
+
+    def do_ora_tns_poison (self,args):
+
+        """
+
+        Command Name : ora_tns_poison
+​
+        Explanation
+        ----------
+        ora_tns_poison command checks database
+        if there is tns poison vulnerability.
+        This command checks a server or servers or a network range
+        Port can be a single port or ports or a port range
+        Syntax
+        ----------
+        ora_tns_poison -s  <servename1,servername2,...>  -p  <port01,port02 ...>
+        ora_tns_poison -s  < xxx.xxx.xxxx.xx-xxx> -p < port01-port02>
+        Samples
+        ---------
+        ora_tns_poison -s 192.168.0.27 -p 1521
+        ora_tns_poison -s 192.168.0.27 -p 1521-1522
+        ora_tns_poison -s 192.168.0.27-28  -p 1521,1522
+        ora_tns_poison -s 192.168.0.27, 192.168.15.28  -p 1521,1522
+        ora_tns_poison -s 192.168.0.27-30  -p 1521,1522
+        ora_tns_poison -s servername01  -p 1521,1522
+        ora_tns_poison -s servername01,servername01  -p 1521,1522
+
+        """
+        ora_tns_poison(args)
 
     def do_mssql_chk_browser (self,args):
        
@@ -336,8 +367,8 @@ class REPL(Cmd):
 ​
         Explanation
         ----------
-        ping_dbports tries to open a TCP socket connection
-        with default database ports, Which are given below.
+        ping_dbports tries to open a TCP socket connection with default database ports
+        Which are given below.
 
         Ports      	Default Ports
         ------------    --------------------------

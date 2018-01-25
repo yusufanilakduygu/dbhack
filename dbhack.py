@@ -12,6 +12,8 @@ from dbhack_mssqlModules import *
 import pyparsing
 from dbhack_error_module import *
 from dbhack_pingModules import *
+from dbhack_pingModules import *
+from dbhack_DatabaseModules import *
 
 class REPL(Cmd):
 
@@ -398,6 +400,15 @@ class REPL(Cmd):
         print(" dbhack ver 1.1 Developed bu Y. Anıl Akduygu at Sile/Istanbul ")
         print(" ")
 
+    def do_connect_database(self,args):
+        connect_database()
+
+    def do_create_audit(self,args):
+        create_audit(args)
+
+    def do_delete_audit(self,args):
+        delete_audit(args)
+        
     def do_exit(self,args):
         exit()
 

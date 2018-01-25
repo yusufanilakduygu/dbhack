@@ -1134,4 +1134,50 @@ def parse_server_port(pcmd):
           
     return return_list
 
+# parse_create_audit(" -n a -exp adana;")
+
+def parse_create_audit(pcmd):
+   
+    audit_name=Combine(Word(alphas)+Optional(Word(alphas+nums+"."+"-")))
+    audit_exp=Combine(Word(alphas)+Optional(Word(alphas+nums+"."+"-"+" ")))
+    audit_name_parser='-n '+ Group(audit_name).setResultsName('audit')
+    audit_exp_parser='-exp '+ Group(audit_exp).setResultsName('exp')
+   
+    command_parser= (audit_name_parser & audit_exp_parser)+";"
+   
+    return_list=list()
+   
+    try:
+        parse_result= command_parser.parseString(pcmd)
+    except ParseException:
+        error_module('parse_create_audit_010','ParseException from dbhack_parser.parse_create_audit','Your command can not be parsed')
+        return_list=['Error']
+        return return_list
+
+    return_list.append(parse_result['audit'][0])
+    return_list.append(parse_result['exp'][0])
+
+    return return_list
+
+
+def parse_audit(pcmd):
+   
+    audit_name=Combine(Word(alphas)+Optional(Word(alphas+nums+"."+"-")))
+    audit_name_parser='-n '+ Group(audit_name).setResultsName('audit')
+   
+    command_parser= (audit_name_parser )+";"
+   
+    return_list=list()
+   
+    try:
+        parse_result= command_parser.parseString(pcmd)
+    except ParseException:
+        error_module('parse_audit_010','ParseException from dbhack_parser.parse_audit','Your command can not be parsed')
+        return_list=['Error']
+        return return_list
+
+    return_list.append(parse_result['audit'][0])
+
+
+    return return_list
 

@@ -408,6 +408,12 @@ class REPL(Cmd):
 
     def do_delete_audit(self,args):
         delete_audit(args)
+
+    def do_show_current_audit(self,args):
+        show_current_audit(args)
+
+    def do_use_audit(self,args):
+        use_audit(args)
         
     def do_exit(self,args):
         exit()

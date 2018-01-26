@@ -11,7 +11,8 @@ def connect_database():
                                       password='anil',
                                       host='127.0.0.1',
                                       database='DBHack')
-    return 
+    return
+
 
 def sd():
     c=global_connect.cursor()
@@ -24,11 +25,18 @@ def sd():
 
 def create_audit(args):
     parsed_command=parse_create_audit(args+" ;")
-    c=global_connect.cursor()
-    
+
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+        
     try:
         c.execute('Create database '+parsed_command[0]+' ;')
         c.execute('commit;')
+        c.close
     except mysql.Error as err:
             print("Failed to create audit: {}".format(err))
             return
@@ -38,15 +46,68 @@ def create_audit(args):
     
 def delete_audit(args):
     parsed_command=parse_audit(args+" ;")
-    c=global_connect.cursor()
-
+    
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+    
     try:
         c.execute('Drop database '+parsed_command[0]+' ;')
         c.execute('commit;')
-    except mysql.Error as err:
-        print("Failed to drop audit: {}")
+        c.close
+    except mysql.connector.Error as err:
+        print("Failed to drop audit: {}".format(err))
         return
         
-    print ( 'Audit created successfully')
+    print ( 'Audit deleted successfully')
+    
+    return
+
+
+def show_current_audit(args):
+    
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+        
+    try:
+        c.execute('Select database() from dual ;')
+        result_set=c.fetchall()
+        print('Current Audit')
+        print(tabulate(result_set,tablefmt="grid"))
+        c.execute('commit;')
+        c.close
+    except mysql.Error as err:
+            print("Failed SQL Statement in show_current_audit {}".format(err))
+            return
+        
+    return
+
+
+def use_audit(args):
+    parsed_command=parse_audit(args+" ;")
+    
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+    
+    try:
+        c.execute('use '+parsed_command[0]+' ;')
+        c.execute('commit;')
+        c.close
+    except mysql.connector.Error as err:
+        print("Failed statement {}".format(err))
+        return
+        
+    print ( 'Audit changed')
     
     return

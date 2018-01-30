@@ -14,18 +14,11 @@ def connect_database():
     return
 
 
-def sd():
-    c=global_connect.cursor()
-    c.execute('Show databases;')
-    result_set=c.fetchall()
-    print(result_set)
-    c.close
-    return
-
 
 def create_audit(args):
     parsed_command=parse_create_audit(args+" ;")
-
+    if parsed_command[0] == 'Error':
+        return
     try:
         c=global_connect.cursor()  
     except Exception as error:
@@ -35,7 +28,17 @@ def create_audit(args):
         
     try:
         c.execute('Create database '+parsed_command[0]+' ;')
+        
+
+        add_audit = ("INSERT INTO DBHack.audit_info "
+                     "(create_date, audit_name, info) "
+                     "VALUES (CURDATE(), %s, %s)")
+        
+        data_audit=(parsed_command[0],parsed_command[1],)
+
+        c.execute(add_audit,data_audit)
         c.execute('commit;')
+        
         c.close
     except mysql.Error as err:
             print("Failed to create audit: {}".format(err))
@@ -46,6 +49,8 @@ def create_audit(args):
     
 def delete_audit(args):
     parsed_command=parse_audit(args+" ;")
+    if parsed_command[0] == 'Error':
+        return
     
     try:
         c=global_connect.cursor()  
@@ -55,6 +60,10 @@ def delete_audit(args):
         return
     
     try:
+        statement="DELETE from DBHack.audit_info where audit_name = %s "
+        delete_data=(parsed_command[0],)
+        c.execute(statement,delete_data)
+        
         c.execute('Drop database '+parsed_command[0]+' ;')
         c.execute('commit;')
         c.close
@@ -92,6 +101,8 @@ def show_current_audit(args):
 
 def use_audit(args):
     parsed_command=parse_audit(args+" ;")
+    if parsed_command[0] == 'Error':
+        return
     
     try:
         c=global_connect.cursor()  
@@ -109,5 +120,28 @@ def use_audit(args):
         return
         
     print ( 'Audit changed')
+    
+    return
+
+
+def show_audit(args):
+    
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+    
+    try:
+        c.execute('select * from DBHack.audit_info ;')
+        result_set=c.fetchall()
+        column_set=[('Create Date','Audit Name','Explanation')]
+        print(tabulate(column_set+result_set,tablefmt="grid"))
+        c.execute('commit;')
+        c.close
+    except mysql.connector.Error as err:
+        print("Failed SQL Statement in show_audit: {}".format(err))
+        return
     
     return

@@ -414,6 +414,9 @@ class REPL(Cmd):
 
     def do_use_audit(self,args):
         use_audit(args)
+
+    def do_show_audits(self,args):
+        show_audit(args)
         
     def do_exit(self,args):
         exit()

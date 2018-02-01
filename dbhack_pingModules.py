@@ -2,6 +2,7 @@ import socket
 import itertools
 import os
 from dbhack_parser import *
+from dbhack_DatabaseModules import *
 
 
 
@@ -36,6 +37,7 @@ def network_ping(args):
     else:
             for i in itertools.product( parsed_command[0]):
                 response = network_ping_run (i[0])
+
                 if response == 0:
                     print("")
                     print (" Connection : "+i[0]+" Ping Successfuly Responding" );
@@ -59,7 +61,7 @@ def network_ping_ports(args):
 
 
 
-def network_ping_port_db(p_servername,p_port,p_exp):
+def network_ping_port_db(p_servername,p_port,p_exp,db_connect):
     global globvar01
     sock= socket.socket()
     sock.settimeout(5)
@@ -75,7 +77,7 @@ def network_ping_port_db(p_servername,p_port,p_exp):
 
 
 
-def network_ping_special_port(args):
+def network_ping_special_port(args,db_connect):
     global globvar01
     globvar01=0
     print('')
@@ -83,19 +85,19 @@ def network_ping_special_port(args):
     response = network_ping_run (args)
     if response == 0:
         
-        network_ping_port_db(args,1521,'Oracle Net Listener')
-        network_ping_port_db(args,1522,'Oracle Net Listener')
-        network_ping_port_db(args,1523,'Oracle Net Listener')
-        network_ping_port_db(args,1524,'Oracle Net Listener')
-        network_ping_port_db(args,1525,'Oracle Net Listener')
-        network_ping_port_db(args,1526,'Oracle Net Listener')
-        network_ping_port_db(args,1433,'SQL Server Database Engine')
-        network_ping_port_db(args,1434,'SQL Server Browser Service')
-        network_ping_port_db(args,3306,'MySQL')
-        network_ping_port_db(args,5432,'PostgreSQL')
-        network_ping_port_db(args,27017,'MongoDB')
-        network_ping_port_db(args,27018,'MongoDB')
-        network_ping_port_db(args,27019,'MongoDB')
+        network_ping_port_db(args,1521,'Oracle Net Listener',db_connect)
+        network_ping_port_db(args,1522,'Oracle Net Listener',db_connect)
+        network_ping_port_db(args,1523,'Oracle Net Listener',db_connect)
+        network_ping_port_db(args,1524,'Oracle Net Listener',db_connect)
+        network_ping_port_db(args,1525,'Oracle Net Listener',db_connect)
+        network_ping_port_db(args,1526,'Oracle Net Listener',db_connect)
+        network_ping_port_db(args,1433,'SQL Server Database Engine',db_connect)
+        network_ping_port_db(args,1434,'SQL Server Browser Service',db_connect)
+        network_ping_port_db(args,3306,'MySQL',db_connect)
+        network_ping_port_db(args,5432,'PostgreSQL',db_connect)
+        network_ping_port_db(args,27017,'MongoDB',db_connect)
+        network_ping_port_db(args,27018,'MongoDB',db_connect)
+        network_ping_port_db(args,27019,'MongoDB',db_connect)
         
         if globvar01 == 0:
             print( ' No Default Database port is Detected on this server ')
@@ -105,11 +107,12 @@ def network_ping_special_port(args):
 
     return
 
-def network_ping_dbports(args):
+def network_ping_dbports(args,db_connect):
     parsed_command=parse_server(args+" ;")
+
     if parsed_command[0] == 'Error':
             return
     else:
             for i in itertools.product( parsed_command[0]):
-                network_ping_special_port(i[0])
+                network_ping_special_port(i[0],db_connect)
     return

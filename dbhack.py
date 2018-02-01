@@ -15,10 +15,11 @@ from dbhack_pingModules import *
 from dbhack_pingModules import *
 from dbhack_DatabaseModules import *
 
+
 class REPL(Cmd):
 
 
-   
+    db_connect="Not_Connected"
 
     prompt = "dbhack> "
     
@@ -393,7 +394,7 @@ class REPL(Cmd):
 	ping_dbports -s 192.168.1.37, 192.168.1.42
    
         """
-        network_ping_dbports(args)
+        network_ping_dbports(args,self.db_connect)
         
     def do_version(self,args):
         print('')
@@ -401,7 +402,10 @@ class REPL(Cmd):
         print(" ")
 
     def do_connect_database(self,args):
-        connect_database()
+        return_code=connect_database()
+        if return_code=='Connected':
+            self.db_connect="Connected"
+        
 
     def do_create_audit(self,args):
         create_audit(args)
@@ -429,4 +433,5 @@ if __name__ == '__main__':
     print(" ")
     print("DBHack program ver 1.1 Developed by Y. Anıl Akduygu in Sile - Istanbul")
     app = REPL()
+
     app.cmdloop()

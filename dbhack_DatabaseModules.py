@@ -1,17 +1,24 @@
 import mysql.connector
 from dbhack_parser import *
 from tabulate import tabulate
-
+global global_db_connect
 
 
 
 def connect_database():
     global global_connect
-    global_connect = mysql.connector.connect(user='anil',
-                                      password='anil',
-                                      host='127.0.0.1',
-                                      database='DBHack')
-    return
+    try:
+        global_connect = mysql.connector.connect(user='anil',
+                                          password='anil',
+                                          host='127.0.0.1',
+                                          database='DBHack')
+    except Exception as error:
+            print("Failed to connect to database")
+            return ('NotConnected')
+
+    print ( 'Successfully connected to the Database')
+    
+    return('Connected')
 
 
 

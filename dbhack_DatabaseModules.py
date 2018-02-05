@@ -152,3 +152,31 @@ def show_audit(args):
         return
     
     return
+
+
+def insert_pingdbports_out(p_servername,p_port,p_exp,p_hit):
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+
+    try:
+
+        Statement = ("INSERT INTO ping_dbports_out"
+                     "(create_date, server_name,exp,port,hit) "
+                     "VALUES (now(),%s,%s,%s,%s)")
+        
+        Data =(p_servername,p_exp,p_port,p_hit,)
+
+        c.execute(Statement,Data)
+        c.execute('commit;')     
+        c.close
+
+    except mysql.Error as err:
+            print("Failed to insert ping_dbports_out{}".format(err))
+            return
+
+
+    

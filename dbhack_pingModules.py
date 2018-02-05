@@ -68,11 +68,15 @@ def network_ping_port_db(p_servername,p_port,p_exp,db_connect):
     try:
         sock.connect((p_servername, p_port))
     except Exception as error:
-        pass
+        if db_connect=="Connected":
+            insert_pingdbports_out(p_servername,p_port,p_exp,'N')
         sock.close()
         return
     globvar01=globvar01+1
     print('   '+p_exp+' Detected on port '+str(p_port))
+    if db_connect=="Connected":
+        hit='Y'
+        insert_pingdbports_out(p_servername,p_port,p_exp,'Y')
     sock.close()
 
 

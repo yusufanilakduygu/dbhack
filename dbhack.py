@@ -61,7 +61,7 @@ class REPL(Cmd):
         ora_chk -s servername01,servername01  -p 1521,1522
 
         """
-        ora_chk(args)
+        ora_chk(args,self.db_connect)
 
     def do_ora_tns_poison (self,args):
 
@@ -90,7 +90,7 @@ class REPL(Cmd):
         ora_tns_poison -s servername01,servername01  -p 1521,1522
 
         """
-        ora_tns_poison(args)
+        ora_tns_poison(args,self.db_connect)
 
     def do_mssql_chk_browser (self,args):
        
@@ -175,7 +175,7 @@ class REPL(Cmd):
         ora_sid -s 192.168.0.27  -p 1521,1522  -sid DB3,DB4
         ora_sid -s 192.168.0.27  -p 1521,1522  -sid_file sid-list.txt 
         """
-        ora_chk_sid(args)
+        ora_chk_sid(args,self.db_connect)
 
     def do_ora_brute (self,args):
 
@@ -202,7 +202,7 @@ class REPL(Cmd):
         ora_brute -s 192.168.1.34 -p 1521 -sid DB3 -user_file username-list.txt -passwd_file passwd-list.txt
           
         """
-        ora_connect(args)
+        ora_connect(args, self.db_connect)
         
     def do_mssql_brute (self,args):
 
@@ -304,7 +304,7 @@ class REPL(Cmd):
         ora_brute_file  -s 192.168.1.34 -p 1521 -sid DB3 -cred_file oracle-cred-file.txt
 
         """
-        ora_brute_with_file(args)
+        ora_brute_with_file(args,self.db_connect)
 
     def do_ping (self,args):
        

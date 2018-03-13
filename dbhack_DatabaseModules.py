@@ -45,7 +45,10 @@ def create_audit(args):
 
         c.execute(add_audit,data_audit)
         c.execute('commit;')
-        
+
+        print('Create table ' +parsed_command[0]+'.ping_dbports_out')
+        c.execute('Create table '+parsed_command[0]+'.ping_dbports_out(create_date datetime, server_name varchar(100),exp varchar(100), port  int,hit char(1));')
+                 
         c.close
     except mysql.Error as err:
             print("Failed to create audit: {}".format(err))
@@ -174,9 +177,108 @@ def insert_pingdbports_out(p_servername,p_port,p_exp,p_hit):
         c.execute('commit;')     
         c.close
 
-    except mysql.Error as err:
+    except mysql.connector.Error  as err:
             print("Failed to insert ping_dbports_out{}".format(err))
             return
 
 
-    
+def insert_ora_chk_out(p_servername,p_port,p_listener_name,p_db_version,p_hit):
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+
+    try:
+
+        Statement = ("INSERT INTO ora_chk_out"
+                     "(create_date, server_name,port,listener_name,db_version,hit) "
+                     "VALUES (now(),%s,%s,%s,%s,%s)")
+        
+        Data =(p_servername,p_port, p_listener_name,p_db_version,p_hit,)
+
+        c.execute(Statement,Data)
+        c.execute('commit;')     
+        c.close
+
+    except mysql.connector.Error as err:
+            print("Failed to insert ora_chk_out{}".format(err))
+            return
+
+
+
+def insert_ora_sid_out(p_servername,p_port,p_sid_name,p_service_name,p_hit):
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+
+    try:
+
+        Statement = ("INSERT INTO ora_sid_out"
+                     "(create_date, server_name,port,sid_name,service_name,hit) "
+                     "VALUES (now(),%s,%s,%s,%s,%s)")
+        
+        Data =(p_servername,p_port, p_sid_name,p_service_name,p_hit,)
+
+        c.execute(Statement,Data)
+        c.execute('commit;')     
+        c.close
+
+    except mysql.connector.Error as err:
+            print("Failed to insert ora_chk_out{}".format(err))
+            return
+
+
+def insert_ora_brute_out(p_server,p_port,p_sid,p_server_name,p_user,p_passwd,p_ORA_code,p_hit):
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+
+    try:
+
+        Statement = ("INSERT INTO ora_brute_out"
+                     "(create_date,server_name,port,sid_name,service_name,user_name,passwd,ORA_code,hit) "
+                     "VALUES (now(),%s,%s,%s,%s,%s,%s,%s,%s)")
+        
+        Data =(p_server,p_port,p_sid,p_server_name,p_user,p_passwd,p_ORA_code,p_hit,)
+
+        c.execute(Statement,Data)
+        c.execute('commit;')     
+        c.close
+
+    except mysql.connector.Error as err:
+            print("Failed to insert ora_brute_out{}".format(err))
+            return
+
+
+def insert_ora_tns_poison_out(p_server,p_port,p_hit):
+    try:
+        c=global_connect.cursor()  
+    except Exception as error:
+        print(' Please Connect to the database with connect_database command')
+        print('')
+        return
+
+    try:
+
+        Statement = ("INSERT INTO ora_tns_poison_out"
+                     "(create_date, server_name,port,hit) "
+                     "VALUES (now(),%s,%s,%s)")
+        
+        Data =(p_server,p_port,p_hit,)
+
+        c.execute(Statement,Data)
+        c.execute('commit;')     
+        c.close
+
+    except mysql.connector.Error as err:
+            print("Failed to insert ora_tns_poison_out{}".format(err))
+            return
+

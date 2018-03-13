@@ -4,9 +4,10 @@ from dbhack_parser import *
 import socket
 import itertools
 import cx_Oracle
+from dbhack_DatabaseModules import *
 
 
-def tns_ping(p_servername,p_port):
+def tns_ping(p_servername,p_port,db_connect):
     sock= socket.socket()
     sock.settimeout(5)
     try:
@@ -18,12 +19,14 @@ def tns_ping(p_servername,p_port):
         print('  Not Connected to Server ' + str(error))
         print("")
         sock.close()
+        if db_connect=="Connected":  
+            insert_ora_chk_out(p_servername,p_port,'','','X')
         return
     print('  Connected to the port')	
 
     # Message sent: (CONNECT_DATA=(COMMAND=ping)) ODB
     # to check listener is running
-    
+    listener_name=''
     send_msg= bytearray ([0x00, 0x57, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 
     0x01, 0x3a, 0x01, 0x2c, 0x00, 0x00, 0x20, 0x00, 
     0x7f, 0xff, 0xc6, 0x0e, 0x00, 0x00, 0x01, 0x00, 
@@ -42,17 +45,22 @@ def tns_ping(p_servername,p_port):
         print("")
         print('  After port connection Error ' + str(error))
         print("")
+        if db_connect=="Connected":  
+            insert_ora_chk_out(p_servername,p_port,'','','N')
         sock.close()
         return
     decoded_msg=msg.decode('ascii')
     i=decoded_msg.find('ERR=0')
     if i != -1:
-        print ('  Oracle Listener Found')  
-        print('    Listener Name : ',msg.decode('ascii')[msg.decode('ascii').find("ALIAS=")+6:-2], end="")
+        print ('  Oracle Listener Found')
+        listener_name=msg.decode('ascii')[msg.decode('ascii').find("ALIAS=")+6:-2]
+        print('    Listener Name : ', listener_name, end="")
         print()
     else:
         print ("  Oracle Listener Not Found")
         print()
+        if db_connect=="Connected":  
+            insert_ora_chk_out(p_servername,p_port,'','','N')
         sock.close()
         return
 
@@ -83,53 +91,52 @@ def tns_ping(p_servername,p_port):
     vssnum_loc=ascii_message.find('VSNNUM=')
     version_number=hex(int(ascii_message[vssnum_loc+7:vssnum_loc+7+9]))
     sock.close()
-    print('    DB version    : ' ,
-       str(int(version_number[2:3],16))+'.'+
-       str(int(version_number[3:4],16))+'.'+
-       str(int(version_number[4:6],16))+'.'+
-       str(int(version_number[6:7],16))+'.'+
-       str(int(version_number[7:9],16))
-      )
+    db_version=str(int(version_number[2:3],16))+'.'+str(int(version_number[3:4],16))+'.'+str(int(version_number[4:6],16))+'.'+str(int(version_number[6:7],16))+'.'+str(int(version_number[7:9],16))
+    print('    DB version    : ' , db_version)
     print()
-
+    
+    if db_connect=="Connected":  
+        insert_ora_chk_out(p_servername,p_port,listener_name,db_version,'Y')
         
     return
 
-def ora_chk(args):
+def ora_chk(args,db_connect):
     parsed_command=parse_ping(args+" ;")
     if parsed_command[0] == 'Error':
             return
     else:
             for i in itertools.product( parsed_command[0], parsed_command[1]):
-                tns_ping(i[0],i[1])
+                tns_ping(i[0],i[1],db_connect)
     return
 
-def ora_chk_sid(args):
+def ora_chk_sid(args,db_connect):
     parsed_command=parse_sid(args+" ;")
     if parsed_command[0] == 'Error':
             return
     else:
             for i in itertools.product( parsed_command[0], parsed_command[1],parsed_command[2]):
-                oracle_sid_test(i[0],i[1],i[2])
+                oracle_sid_test(i[0],i[1],i[2],db_connect)
     return
 
-def ora_connect (args):
+def ora_connect (args,db_connect):
     parsed_command=parse_user(args+" ;")
     if parsed_command[0] == 'Error':
             return
     else:
             for i in itertools.product( parsed_command[0], parsed_command[1],parsed_command[2],parsed_command[3],parsed_command[4] ):
-                ora_connect_test(i[0],i[1],i[2],i[3],i[4])
+                ora_connect_test_service_name(i[0],i[1],i[2],i[3],i[4],db_connect)
+                ora_connect_test_sid_name(i[0],i[1],i[2],i[3],i[4],db_connect)
     return
 
 
-def ora_brute_with_file (args):
+def ora_brute_with_file (args,db_connect):
     parsed_command=parse_brute_file(args+" ;")
     if parsed_command[0] == 'Error':
             return
     else:
             for i in   range(0,len(parsed_command[3])):
-                ora_connect_test(parsed_command[0][0],parsed_command[1][0],parsed_command[2][0] ,parsed_command[3][i][0] , parsed_command[3][i][1] )
+                ora_connect_test_service_name(parsed_command[0][0],parsed_command[1][0],parsed_command[2][0] ,parsed_command[3][i][0] , parsed_command[3][i][1],db_connect )
+             #   ora_connect_test_sid_name(parsed_command[0][0],parsed_command[1][0],parsed_command[2][0] ,parsed_command[3][i][0] , parsed_command[3][i][1],db_connect )
     return
 
 
@@ -141,7 +148,7 @@ def oracle_version(args):
 
 # oracle_sid_test( "192.200.11.9",1521,"DB3")
 
-def oracle_sid_test(p_servername,p_port,p_sid):   
+def oracle_sid_test(p_servername,p_port,p_sid,db_connect):   
 
 # Check for SID
 
@@ -202,6 +209,8 @@ def oracle_sid_test(p_servername,p_port,p_sid):
         print("")
         print('  Not Connected to Server ' + str(error))
         print("")
+        if db_connect=="Connected":  
+            insert_ora_sid_out(p_servername,p_port,p_sid,'','X')
         sock.close()
         return
     print('  Connected to the port')	
@@ -213,8 +222,12 @@ def oracle_sid_test(p_servername,p_port,p_sid):
     msg = sock.recv(2048)
     if msg == correct_returned_message:
         print ('>>> '+p_sid+' services on this server as SID <<< SID FOUND ')
+        if db_connect=="Connected":  
+            insert_ora_sid_out(p_servername,p_port,p_sid,'','Y')        
     else:
         print ('    '+p_sid+' does not service on this server as SID')
+        if db_connect=="Connected":  
+            insert_ora_sid_out(p_servername,p_port,p_sid,'','N')
          
         
     sock.close()
@@ -287,8 +300,12 @@ def oracle_sid_test(p_servername,p_port,p_sid):
     msg = sock.recv(2048)
     if msg == correct_returned_message:
         print ('>>> '+p_sid+' services on this server as SERVICE_NAME <<< SERVICE_NAME FOUND')
+        if db_connect=="Connected":  
+            insert_ora_sid_out(p_servername,p_port,'',p_sid,'Y')
     else:
         print ('    '+p_sid+' does not service on this server as SERVICE_NAME')
+        if db_connect=="Connected":  
+            insert_ora_sid_out(p_servername,p_port,'',p_sid,'N')
          
     sock.close()
 
@@ -296,7 +313,30 @@ def oracle_sid_test(p_servername,p_port,p_sid):
     return
 
 
-def ora_connect_test( p_server,p_port,p_sid,p_user,p_passwd):
+def ora_connect_test_service_name( p_server,p_port,p_sid,p_user,p_passwd,db_connect):
+    print(" ")
+    print (' Connection Test: '+p_server+';'+str(p_port)+';'+p_sid+';'+p_user+';'+p_passwd)
+    try:
+        dsn_tns = cx_Oracle.makedsn(p_server , p_port, p_sid).replace('SID','SERVICE_NAME')
+        connection = cx_Oracle.Connection(p_user,p_passwd,dsn_tns)
+    except Exception as error:
+        print("")
+        print('  Not Connected to Oracle ' + str(error) )
+        print("")
+        ascii_message2=str(error) 
+        ORA_loc=ascii_message2.find('ORA-')
+        ORA_code=ascii_message2[ORA_loc:ORA_loc+9]
+        print(ORA_code)
+        if db_connect=="Connected":  
+            insert_ora_brute_out(p_server,p_port,' ',p_sid,p_user,p_passwd,ORA_code,'N')
+        return
+    print(' Connection is Successfull DB version ',connection.version)
+    if db_connect=="Connected":  
+        insert_ora_brute_out(p_server,p_port,' ',p_sid,p_user,p_passwd,'','Y')
+    connection.close
+    return
+
+def ora_connect_test_sid_name( p_server,p_port,p_sid,p_user,p_passwd,db_connect):
     print(" ")
     print (' Connection Test: '+p_server+';'+str(p_port)+';'+p_sid+';'+p_user+';'+p_passwd)
     try:
@@ -306,13 +346,22 @@ def ora_connect_test( p_server,p_port,p_sid,p_user,p_passwd):
         print("")
         print('  Not Connected to Oracle ' + str(error) )
         print("")
+        ascii_message2=str(error) 
+        ORA_loc=ascii_message2.find('ORA-')
+        ORA_code=ascii_message2[ORA_loc:ORA_loc+9]
+        print(ORA_code)
+        if db_connect=="Connected":  
+            insert_ora_brute_out(p_server,p_port,p_sid,' ',p_user,p_passwd,ORA_code,'N')
         return
     print(' Connection is Successfull DB version ',connection.version)
+    if db_connect=="Connected":  
+        insert_ora_brute_out(p_server,p_port,p_sid,' ',p_user,p_passwd,'','Y')
     connection.close
     return
 
 
-def tns_poison(p_servername,p_port):
+
+def tns_poison(p_servername,p_port,db_connect):
     sock= socket.socket()
     sock.settimeout(5)
     try:
@@ -323,6 +372,8 @@ def tns_poison(p_servername,p_port):
         print("")
         print('  Not Connected to Server ' + str(error))
         print("")
+        if db_connect=="Connected":  
+            insert_ora_tns_poison_out(p_servername,p_port,'X')
         sock.close()
         return
     print('  Connected to the port')
@@ -351,17 +402,21 @@ def tns_poison(p_servername,p_port):
     if vssnum_loc == -1:
         print ('  >>> Tns Poision vulnerability <<< FOUND')   
         print()
+        if db_connect=="Connected":  
+            insert_ora_tns_poison_out(p_servername,p_port,'Y')
     else:
         print ("  There is no tns poison vulnerability")
         print()
+        if db_connect=="Connected":  
+            insert_ora_tns_poison_out(p_servername,p_port,'N')
     sock.close()
     return
 
-def ora_tns_poison(args):
+def ora_tns_poison(args,db_connect):
     parsed_command=parse_server_port(args+" ;")
     if parsed_command[0] == 'Error':
             return
     else:
             for i in itertools.product( parsed_command[0], parsed_command[1]):
-                tns_poison(i[0],i[1])
+                tns_poison(i[0],i[1],db_connect)
     return
